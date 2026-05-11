@@ -42,7 +42,7 @@ const char* MQTT_BROKER = "broker.emqx.io";
 const int MQTT_PORT = 1883;
 const char* MQTT_USER = "";
 const char* MQTT_PASSWORD = "";
-const char* MQTT_TOPIC = "opaiot-dht-1";
+const char* MQTT_TOPIC = "aula/opaiot/termo-higrometro";
 
 // DHT22
 #define DHT_PIN 15
