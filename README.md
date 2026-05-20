@@ -4,6 +4,10 @@ Este repositorio organiza materiais didaticos do curso de OpAIoT, com foco nas p
 
 O caminho principal de estudo esta no `Modulo_2`, que evolui de exemplos basicos de entrada e saida digital ate um pipeline IoT completo. O `Modulo_3` ja possui uma pasta inicial para integracao, atualmente com um arquivo reservado.
 
+<img width="1672" height="941" alt="IoT-Mod2" src="https://github.com/user-attachments/assets/5c5769c9-ca2a-4806-bef5-74860d953c09" />
+
+
+
 ## Como navegar
 
 1. Comece pela pratica de blink em [Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino](Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino).
