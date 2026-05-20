@@ -1,4 +1,4 @@
-# IoTDataSamplingLab
+# Material Extra sobre Amostragem e Conversão A/D
 
 Material didático sobre **amostragem, aquisição e tratamento de dados em IoT**. O projeto demonstra o ciclo completo de um sistema de sensoriamento: leitura de um acelerômetro num microcontrolador, transmissão via MQTT, processamento no servidor (FFT), armazenamento em série temporal e visualização em tempo real.
 
