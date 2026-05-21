@@ -128,9 +128,3 @@ temperature_metrics
 
 Campos principais: `device_id`, `location`, `temperature`, `humidity` e `time`.
 
-## Estado verificado
-
-- O repositorio contem exemplos Arduino `.ino`, documentacao Markdown, configuracoes Docker, backend Node.js, scripts SQL, configuracoes Mosquitto e provisionamento Grafana.
-- A pratica de potenciometro aparece em duas aulas: uma introducao em sensores e uma retomada na aula de ADC.
-- O arquivo [Modulo_3/Aula_1/integration.ino](Modulo_3/Aula_1/integration.ino) esta vazio e parece reservado para conteudo futuro.
-- A pasta da Aula 8 contem documentacao propria; este README raiz serve como indice geral e ponto de entrada para o curso.
