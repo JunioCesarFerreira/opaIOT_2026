@@ -13,6 +13,77 @@ Scripts principais:
 - `scripts/1-inspect.py`: lê o CSV, normaliza nomes de colunas, gera perfis, resumo numérico, eventos JSONL e schema.
 - `scripts/2-prometheus.py`: lê o CSV e expõe leituras simuladas como métricas Prometheus em `/metrics`.
 
+## Análise por inspeção
+
+A análise por inspeção é a primeira etapa da prática. O objetivo é entender o dataset antes de integrá-lo a uma ferramenta de observabilidade.
+
+O script `scripts/1-inspect.py` faz uma leitura exploratória do arquivo `data/IoT_Indoor_Air_Quality_Dataset.csv` sem modificar o CSV original. Durante a execução, ele:
+
+- normaliza os nomes das colunas para nomes mais fáceis de usar em código;
+- identifica colunas numéricas que representam medições de sensores;
+- classifica colunas em categorias semânticas, como `measurement`, `metadata`, `event`, `state` e `command`;
+- calcula estatísticas descritivas das colunas numéricas;
+- gera um schema mínimo para eventos IoT;
+- transforma parte das leituras em eventos normalizados no formato JSONL.
+
+Os arquivos gerados em `outputs/` servem como evidência da inspeção:
+
+- `columns_profile.csv`: perfil técnico das colunas, incluindo tipo, valores nulos, valores únicos e exemplos.
+- `semantic_classification.csv`: classificação semântica das colunas.
+- `numeric_summary.csv`: resumo estatístico das medições numéricas.
+- `normalized_events.jsonl`: eventos IoT normalizados a partir das leituras do CSV.
+- `iot_event_schema.json`: schema mínimo usado para representar eventos IoT.
+- `inspection_summary.json`: resumo da execução do script.
+
+Essa etapa ajuda a responder perguntas como: quais colunas são medições? quais são metadados? quais unidades aparecem? quais dados podem virar métricas?
+
+## Integração dos dados no Prometheus
+
+Depois da inspeção, o script `scripts/2-prometheus.py` usa o CSV como fonte de uma simulação de sensores. Ele lê uma linha por vez, extrai as colunas numéricas e publica os valores como métricas no formato esperado pelo Prometheus.
+
+O script funciona como um exportador Prometheus:
+
+- lê o CSV;
+- normaliza os nomes das colunas;
+- identifica medições numéricas;
+- cria métricas `Gauge`;
+- publica as métricas em `http://localhost:8000/metrics`;
+- atualiza os valores a cada 5 segundos;
+- calcula uma flag simples de anomalia com base em média e desvio padrão.
+
+O Prometheus não lê o CSV diretamente. Ele coleta as métricas expostas pelo script Python. Por isso há dois serviços diferentes:
+
+- Prometheus: interface e banco de séries temporais em `http://localhost:9090`;
+- Exportador Python: endpoint de métricas em `http://localhost:8000/metrics`.
+
+Fluxo da integração:
+
+```mermaid
+flowchart LR
+    CSV["CSV do dataset<br/>IoT_Indoor_Air_Quality_Dataset.csv"]
+    INSPECT["1-inspect.py<br/>inspeção e normalização"]
+    OUTPUTS["outputs/<br/>perfis, resumo, schema e JSONL"]
+    EXPORTER["2-prometheus.py<br/>exportador Python"]
+    METRICS["/metrics<br/>localhost:8000"]
+    PROM["Prometheus<br/>localhost:9090"]
+    UI["Interface gráfica<br/>queries PromQL"]
+
+    CSV --> INSPECT
+    INSPECT --> OUTPUTS
+    CSV --> EXPORTER
+    EXPORTER --> METRICS
+    PROM -- scrape a cada 5s --> METRICS
+    PROM --> UI
+```
+
+Principais métricas publicadas:
+
+- `opaiot_iaq_sensor_value`: valor atual simulado de cada medição do dataset.
+- `opaiot_iaq_anomaly_flag`: indica anomalia simples quando o valor se afasta muito da média.
+- `opaiot_iaq_stream_index`: linha atual do CSV sendo simulada.
+- `opaiot_iaq_dataset_rows`: quantidade total de linhas carregadas.
+- `opaiot_iaq_active_metrics`: quantidade de colunas numéricas exportadas.
+
 ## 1. Acessar a VM Linux pelo Windows
 
 No Windows, abra o PowerShell e confirme que o cliente SSH está disponível:
@@ -53,14 +124,8 @@ Clone o repositório:
 
 ```bash
 cd ~
-git clone https://github.com/JunioCesarFerreira/opaIOT_2026.git
-cd opaIOT_2026/Modulo_3/Aula_1_datasets
-```
-
-Se estiver usando o repositório da organização, troque a URL por:
-
-```bash
 git clone https://github.com/Smart-LaSDPC/opaIOT_2026.git
+cd opaIOT_2026/Modulo_3/Aula_1_datasets
 ```
 
 ## 3. Preparar o ambiente Python
@@ -189,6 +254,11 @@ http://localhost:9090/targets
 ```
 
 O job `opaiot_iaq` deve aparecer como `UP`.
+
+Para iniciar o processo em segundo plano faça:
+```bash
+nohup prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.listen-address=0.0.0.0:9090 > prometheus.log 2>&1 &
+```
 
 ### Prometheus rodando em container Docker
 
