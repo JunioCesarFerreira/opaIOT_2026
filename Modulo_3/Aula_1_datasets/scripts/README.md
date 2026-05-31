@@ -1,4 +1,4 @@
-# Execução dos scripts no Ubuntu
+# Execução dos scripts no Linux
 
 Este diretório contém os scripts didáticos da Aula 1 de datasets:
 
@@ -9,7 +9,7 @@ Os scripts usam constantes no topo do arquivo, como `CSV_FILE`, `OUTPUT_DIR`, `P
 
 ## 1. Preparar o ambiente
 
-No terminal do Ubuntu, entre na raiz do repositório:
+No terminal do Linux, entre na raiz do repositório:
 
 ```bash
 cd ~/source/git/opaIOT_2026
@@ -87,6 +87,92 @@ curl http://localhost:8000/metrics
 ```
 
 Para encerrar o script, pressione `Ctrl+C`.
+
+### Quando o Prometheus está instalado na VM
+
+Se o Prometheus estiver instalado diretamente no Ubuntu, sem Docker, ele consegue acessar o exportador Python por `localhost:8000`.
+
+Edite o arquivo de configuração do Prometheus. Em instalações comuns no Ubuntu, ele fica em:
+
+```bash
+sudo nano /etc/prometheus/prometheus.yml
+```
+
+Inclua um job para esta aula:
+
+```yaml
+scrape_configs:
+  - job_name: "opaiot_iaq"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:8000"]
+```
+
+Se o arquivo já tiver uma seção `scrape_configs`, adicione apenas o bloco do job `opaiot_iaq` dentro dela.
+
+Valide a configuração:
+
+```bash
+promtool check config /etc/prometheus/prometheus.yml
+```
+
+Reinicie o Prometheus:
+
+```bash
+sudo systemctl restart prometheus
+sudo systemctl status prometheus --no-pager
+```
+
+Com o script `2-prometheus.py` rodando em outro terminal, teste:
+
+```bash
+curl http://localhost:8000/metrics | head
+curl http://localhost:9090/-/healthy
+```
+
+Na interface do Prometheus, abra:
+
+```text
+http://localhost:9090/targets
+```
+
+O job `opaiot_iaq` deve aparecer como `UP`. Depois consulte:
+
+```promql
+opaiot_iaq_sensor_value
+```
+
+### Quando o Prometheus está em Docker
+
+Se o Prometheus estiver em um container Docker, o target no `prometheus.yml` não deve ser `localhost:8000`, exceto se o container estiver usando rede host.
+
+No modo bridge padrão do Docker, use:
+
+```yaml
+scrape_configs:
+  - job_name: "opaiot_iaq"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+```
+
+No Linux, o container precisa ser criado com:
+
+```bash
+--add-host=host.docker.internal:host-gateway
+```
+
+Em `docker compose`, use:
+
+```yaml
+extra_hosts:
+  - "host.docker.internal:host-gateway"
+```
+
+Teste de dentro do container:
+
+```bash
+docker exec prometheus wget -qO- http://host.docker.internal:8000/metrics | head
+```
 
 ## 4. Observações importantes
 

@@ -37,8 +37,10 @@ except ImportError as exc:
 
 # Configurações principais da aula.
 CSV_FILE = Path("../data/IoT_Indoor_Air_Quality_Dataset.csv")
-PORT = 9090
-INTERVAL_SECONDS = 5.0
+PORT = 8000
+INTERVAL_SECONDS = 1.0
+DEFAULT_DEVICE_ID = "iaq-sensor-01"
+DEFAULT_LOCATION = "indoor-lab"
 
 
 def normalize_name(name: str) -> str:
@@ -112,6 +114,21 @@ def label_value(row: pd.Series, column: Optional[str], fallback: str) -> str:
     return str(value)
 
 
+def start_metrics_server(port: int) -> None:
+    # Se esta porta estiver ocupada, o erro mais comum é "Address already in use".
+    try:
+        start_http_server(port)
+    except OSError as exc:
+        raise SystemExit(
+            f"Não foi possível iniciar o servidor de métricas na porta {port}.\n"
+            "Verifique se outro processo já está usando essa porta:\n"
+            f"  ss -ltnp | grep ':{port}'\n"
+            "Se a porta estiver ocupada, altere a constante PORT no topo deste arquivo.\n"
+            "Dica: o Prometheus normalmente usa a porta 9090; este exportador deve usar outra porta, como 8000.\n"
+            f"Erro original: {exc}"
+        ) from exc
+
+
 def main() -> None:
     if not CSV_FILE.exists():
         raise SystemExit(f"CSV não encontrado: {CSV_FILE}")
@@ -158,39 +175,44 @@ def main() -> None:
     active_metrics = Gauge("opaiot_iaq_active_metrics", "Number of measurement columns exported")
 
     # 6. Inicia o servidor HTTP local usado pelo Prometheus para coletar métricas.
-    start_http_server(PORT)
+    start_metrics_server(PORT)
     dataset_rows.set(len(df))
     active_metrics.set(len(measurement_columns))
 
     print(f"Serving /metrics on http://localhost:{PORT}/metrics")
     print(f"CSV: {CSV_FILE}")
     print(f"Metrics: {', '.join(measurement_columns)}")
+    print("Mantenha este terminal aberto enquanto o Prometheus coleta as métricas.")
+    print("Para encerrar, pressione Ctrl+C.")
 
     # 7. Percorre as linhas em loop, simulando uma transmissão contínua de sensores.
     row_index = 0
-    while True:
-        row = df.iloc[row_index]
-        device_id = label_value(row, device_col, "iaq-sensor-unknown")
-        location = label_value(row, location_col, "unknown")
-        timestamp = label_value(row, timestamp_col, "no-timestamp")
+    try:
+        while True:
+            row = df.iloc[row_index]
+            device_id = label_value(row, device_col, DEFAULT_DEVICE_ID)
+            location = label_value(row, location_col, DEFAULT_LOCATION)
+            timestamp = label_value(row, timestamp_col, "no-timestamp")
 
-        for metric in measurement_columns:
-            value = pd.to_numeric(pd.Series([row[metric]]), errors="coerce").iloc[0]
-            if pd.isna(value):
-                continue
-            value = float(value)
-            sensor_value.labels(device_id, location, metric, infer_unit(metric)).set(value)
+            for metric in measurement_columns:
+                value = pd.to_numeric(pd.Series([row[metric]]), errors="coerce").iloc[0]
+                if pd.isna(value):
+                    continue
+                value = float(value)
+                sensor_value.labels(device_id, location, metric, infer_unit(metric)).set(value)
 
-            mean = baselines[metric]["mean"]
-            std = baselines[metric]["std"]
-            is_anomaly = 1.0 if std > 0 and abs(value - mean) > 2 * std else 0.0
-            anomaly_flag.labels(device_id, location, metric).set(is_anomaly)
+                mean = baselines[metric]["mean"]
+                std = baselines[metric]["std"]
+                is_anomaly = 1.0 if std > 0 and abs(value - mean) > 2 * std else 0.0
+                anomaly_flag.labels(device_id, location, metric).set(is_anomaly)
 
-        stream_index.set(row_index)
-        print(f"row={row_index} timestamp={timestamp} device={device_id} location={location}", flush=True)
+            stream_index.set(row_index)
+            print(f"row={row_index} timestamp={timestamp} device={device_id} location={location}", flush=True)
 
-        row_index = (row_index + 1) % len(df)
-        time.sleep(INTERVAL_SECONDS)
+            row_index = (row_index + 1) % len(df)
+            time.sleep(INTERVAL_SECONDS)
+    except KeyboardInterrupt:
+        print("\nExportador Prometheus encerrado pelo usuário.")
 
 
 if __name__ == "__main__":
