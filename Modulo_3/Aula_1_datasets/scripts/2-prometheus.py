@@ -38,7 +38,7 @@ except ImportError as exc:
 # Configurações principais da aula.
 CSV_FILE = Path("../data/IoT_Indoor_Air_Quality_Dataset.csv")
 PORT = 8000
-INTERVAL_SECONDS = 1.0
+INTERVAL_SECONDS = 5.0
 DEFAULT_DEVICE_ID = "iaq-sensor-01"
 DEFAULT_LOCATION = "indoor-lab"
 

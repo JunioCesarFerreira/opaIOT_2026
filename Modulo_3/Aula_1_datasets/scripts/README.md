@@ -5,7 +5,13 @@ Este diretório contém os scripts didáticos da Aula 1 de datasets:
 - `1-inspect.py`: inspeciona o CSV, gera perfis das colunas, resumo numérico, eventos normalizados e schema.
 - `2-prometheus.py`: simula uma transmissão de leituras do CSV e expõe métricas Prometheus em `http://localhost:8000/metrics`.
 
-Os scripts usam constantes no topo do arquivo, como `CSV_FILE`, `OUTPUT_DIR`, `PORT` e `INTERVAL_SECONDS`. Para alterar caminhos, porta ou intervalo de atualização, edite essas constantes.
+Os scripts usam constantes no topo do arquivo, como `CSV_FILE`, `OUTPUT_DIR`, `PORT` e `INTERVAL_SECONDS`. No script `2-prometheus.py`, o intervalo atual é de 5 segundos:
+
+```python
+INTERVAL_SECONDS = 5.0
+```
+
+Para alterar caminhos, porta ou intervalo de atualização, edite essas constantes.
 
 ## 1. Preparar o ambiente
 
@@ -116,11 +122,19 @@ Valide a configuração:
 promtool check config /etc/prometheus/prometheus.yml
 ```
 
-Reinicie o Prometheus:
+Reinicie o Prometheus. Nesta VM, o Prometheus é iniciado manualmente, então encerre o processo atual e suba novamente com o arquivo de configuração:
 
 ```bash
-sudo systemctl restart prometheus
-sudo systemctl status prometheus --no-pager
+pkill -f prometheus
+prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.listen-address=0.0.0.0:9090
+```
+
+O comando acima mantém o Prometheus rodando no terminal. Deixe esse terminal aberto enquanto usa a interface gráfica.
+
+Se quiser confirmar que o Prometheus voltou:
+
+```bash
+curl http://localhost:9090/-/healthy
 ```
 
 Com o script `2-prometheus.py` rodando em outro terminal, teste:
@@ -151,6 +165,7 @@ No modo bridge padrão do Docker, use:
 ```yaml
 scrape_configs:
   - job_name: "opaiot_iaq"
+    scrape_interval: 5s
     static_configs:
       - targets: ["host.docker.internal:8000"]
 ```

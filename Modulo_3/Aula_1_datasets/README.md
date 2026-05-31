@@ -128,6 +128,12 @@ O script fica em execução contínua e expõe métricas em:
 http://localhost:8000/metrics
 ```
 
+O intervalo atual de publicação do script é de 5 segundos:
+
+```python
+INTERVAL_SECONDS = 5.0
+```
+
 Para testar dentro da VM:
 
 ```bash
@@ -135,6 +141,54 @@ curl http://localhost:8000/metrics | head
 ```
 
 Para encerrar, pressione `Ctrl+C`.
+
+### Prometheus instalado diretamente na VM
+
+Se o Prometheus estiver instalado diretamente no Ubuntu, sem Docker, configure o target como `localhost:8000`.
+
+Edite o arquivo:
+
+```bash
+sudo nano /etc/prometheus/prometheus.yml
+```
+
+Inclua ou ajuste o job da aula:
+
+```yaml
+scrape_configs:
+  - job_name: "opaiot_iaq"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:8000"]
+```
+
+Valide a configuração:
+
+```bash
+promtool check config /etc/prometheus/prometheus.yml
+```
+
+Nesta VM, o Prometheus é reiniciado manualmente. Encerre o processo atual e suba novamente com:
+
+```bash
+pkill -f prometheus
+prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.listen-address=0.0.0.0:9090
+```
+
+Deixe esse terminal aberto. Em outro terminal, com o `2-prometheus.py` rodando, teste:
+
+```bash
+curl http://localhost:8000/metrics | head
+curl http://localhost:9090/-/healthy
+```
+
+Na interface do Prometheus, abra:
+
+```text
+http://localhost:9090/targets
+```
+
+O job `opaiot_iaq` deve aparecer como `UP`.
 
 ### Prometheus rodando em container Docker
 
