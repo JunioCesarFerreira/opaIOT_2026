@@ -15,10 +15,10 @@ Para alterar caminhos, porta ou intervalo de atualização, edite essas constant
 
 ## 1. Preparar o ambiente
 
-No terminal do Linux, entre na raiz do repositório:
+No terminal do Linux, entre na raiz do repositório. Ajuste o caminho conforme o local onde você clonou o projeto:
 
 ```bash
-cd ~/source/git/opaIOT_2026
+cd ~/opaIOT_2026
 ```
 
 Se necessário, instale Python, `pip` e suporte a ambientes virtuais:
@@ -62,6 +62,8 @@ E gera os resultados em:
 ```text
 ../outputs/
 ```
+
+O repositório também contém `../outputs_example/`, com uma amostra versionada dos resultados esperados.
 
 Arquivos esperados:
 

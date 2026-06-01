@@ -6,7 +6,8 @@ Esta aula usa um dataset de qualidade do ar em ambientes internos para praticar 
 
 - `data/`: contém o CSV usado na aula e a referência da fonte do dataset.
 - `scripts/`: contém os scripts Python e o `requirements.txt`.
-- `outputs/`: recebe os arquivos gerados pelo script de inspeção.
+- `outputs/`: recebe os arquivos gerados localmente pelo script de inspeção.
+- `outputs_example/`: contém uma execução de exemplo versionada para consulta.
 
 Scripts principais:
 
@@ -26,7 +27,7 @@ O script `scripts/1-inspect.py` faz uma leitura exploratória do arquivo `data/I
 - gera um schema mínimo para eventos IoT;
 - transforma parte das leituras em eventos normalizados no formato JSONL.
 
-Os arquivos gerados em `outputs/` servem como evidência da inspeção:
+Os arquivos gerados em `outputs/` servem como evidência da inspeção. A pasta `outputs_example/` guarda uma amostra desses resultados para consulta sem precisar executar o script.
 
 - `columns_profile.csv`: perfil técnico das colunas, incluindo tipo, valores nulos, valores únicos e exemplos.
 - `semantic_classification.csv`: classificação semântica das colunas.
@@ -62,7 +63,7 @@ Fluxo da integração:
 flowchart LR
     CSV["CSV do dataset<br/>IoT_Indoor_Air_Quality_Dataset.csv"]
     INSPECT["1-inspect.py<br/>inspeção e normalização"]
-    OUTPUTS["outputs/<br/>perfis, resumo, schema e JSONL"]
+    OUTPUTS["outputs/ ou outputs_example/<br/>perfis, resumo, schema e JSONL"]
     EXPORTER["2-prometheus.py<br/>exportador Python"]
     METRICS["/metrics<br/>localhost:8000"]
     PROM["Prometheus<br/>localhost:9090"]
@@ -163,6 +164,8 @@ Os arquivos serão gerados em:
 ```text
 ~/opaIOT_2026/Modulo_3/Aula_1_datasets/outputs/
 ```
+
+Se você ainda não executou o script, consulte `outputs_example/` para ver uma amostra dos arquivos esperados.
 
 Confira o resultado:
 
