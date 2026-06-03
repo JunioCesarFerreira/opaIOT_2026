@@ -11,6 +11,7 @@ scripts/
 ├── producer.py
 ├── consumer_metrics.py
 ├── configure_prometheus.sh
+├── configure_grafana.sh
 ├── requirements.txt
 └── README.md
 ```
@@ -18,6 +19,7 @@ scripts/
 - `producer.py`: simula sensores IoT e publica eventos no Kafka.
 - `consumer_metrics.py`: consome eventos Kafka e expõe métricas Prometheus.
 - `configure_prometheus.sh`: configura o Prometheus para coletar o endpoint `/metrics` da prática.
+- `configure_grafana.sh`: configura o data source Prometheus no Grafana e importa um dashboard da prática.
 - `requirements.txt`: dependências Python da prática.
 
 ## 1. Pré-requisitos
@@ -26,6 +28,7 @@ Execute a prática em uma VM Ubuntu com:
 
 - Kafka em execução em `localhost:9092`;
 - Python 3, `venv` e `pip`;
+- `curl`, usado pelos scripts de configuração;
 - Prometheus e Grafana instalados, para a parte de observabilidade.
 
 Se ainda não instalou o Kafka, siga antes o roteiro:
@@ -342,7 +345,62 @@ Na interface do Prometheus, abra:
 http://localhost:9090/targets
 ```
 
-## 12. Consultas PromQL úteis
+## 12. Configurar Grafana
+
+Com o Prometheus configurado e o Grafana já instalado na VM, execute:
+
+```bash
+bash scripts/configure_grafana.sh
+```
+
+Por padrão, o script usa:
+
+```text
+Grafana: http://localhost:3000
+Usuário: admin
+Senha: admin
+Prometheus: http://localhost:9090
+```
+
+Se sua senha do Grafana já foi alterada:
+
+```bash
+GRAFANA_USER=admin \
+GRAFANA_PASSWORD='sua-senha' \
+bash scripts/configure_grafana.sh
+```
+
+Se o Grafana estiver em outra porta:
+
+```bash
+bash scripts/configure_grafana.sh --grafana-url http://localhost:3001
+```
+
+Se o Grafana precisar acessar o Prometheus por outro endereço:
+
+```bash
+bash scripts/configure_grafana.sh --prometheus-url http://localhost:9090
+```
+
+O script cria ou atualiza:
+
+- data source `Prometheus - Kafka IoT`;
+- pasta `OpAIoT`;
+- dashboard `Kafka IoT - Telemetria Observavel`.
+
+Depois acesse:
+
+```text
+http://localhost:3000/d/iot-kafka-telemetry
+```
+
+Se usar token de API ou service account:
+
+```bash
+GRAFANA_API_TOKEN='seu-token' bash scripts/configure_grafana.sh
+```
+
+## 13. Consultas PromQL úteis
 
 Total de eventos consumidos:
 
@@ -386,26 +444,21 @@ iot_events_by_partition_total
 iot_kafka_last_offset
 ```
 
-## 13. Criar painéis no Grafana
+## 14. Painéis criados no Grafana
 
-Adicione o Prometheus como data source:
-
-```text
-http://localhost:9090
-```
-
-Sugestões de painéis:
+O script `configure_grafana.sh` cria um dashboard com estes painéis:
 
 - temperatura por sensor: `iot_temperature_celsius`;
 - umidade por sensor: `iot_humidity_percent`;
 - CO2 por sensor: `iot_co2_ppm`;
 - taxa de eventos: `rate(iot_events_consumed_total[1m])`;
 - eventos por partition: `iot_events_by_partition_total`;
-- offsets por partition: `iot_kafka_last_offset`.
+- último offset consumido: `iot_kafka_last_offset`;
+- total de eventos consumidos: `sum(iot_events_consumed_total)`.
 
-## 14. Configuração por variáveis de ambiente
+## 15. Configuração por variáveis de ambiente
 
-Os scripts aceitam estas variáveis:
+Variáveis dos scripts Python:
 
 ```text
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
@@ -417,6 +470,22 @@ METRICS_PORT=8000
 CONSUMER_ID=<hostname>:<port>
 ```
 
+Variáveis do script do Grafana:
+
+```text
+GRAFANA_URL=http://localhost:3000
+GRAFANA_USER=admin
+GRAFANA_PASSWORD=admin
+GRAFANA_API_TOKEN=
+PROMETHEUS_URL=http://localhost:9090
+GRAFANA_DATASOURCE_NAME=Prometheus - Kafka IoT
+GRAFANA_DATASOURCE_UID=prometheus-kafka-iot
+GRAFANA_FOLDER_UID=opaiot
+GRAFANA_FOLDER_TITLE=OpAIoT
+GRAFANA_DASHBOARD_UID=iot-kafka-telemetry
+GRAFANA_DASHBOARD_TITLE=Kafka IoT - Telemetria Observavel
+```
+
 Exemplo:
 
 ```bash
@@ -426,7 +495,7 @@ SEND_INTERVAL_SECONDS=0.5 \
 python scripts/producer.py
 ```
 
-## 15. Problemas comuns
+## 16. Problemas comuns
 
 Se aparecer `ModuleNotFoundError: No module named 'confluent_kafka'`, ative o ambiente virtual e reinstale:
 
@@ -451,3 +520,21 @@ kafka-consumer-groups.sh --list --bootstrap-server localhost:9092
 ```
 
 E confirme que o producer está publicando no mesmo tópico usado pelo consumer.
+
+Se o script do Grafana retornar erro de autenticação, confirme usuário e senha:
+
+```bash
+GRAFANA_USER=admin GRAFANA_PASSWORD='sua-senha' bash scripts/configure_grafana.sh
+```
+
+Se o Grafana não conseguir consultar o Prometheus, confira a URL configurada no data source. Em uma instalação direta na VM, normalmente é:
+
+```text
+http://localhost:9090
+```
+
+Se o Grafana estiver em container, `localhost` dentro do container aponta para o próprio container. Nesse caso, use um endereço acessível ao container, por exemplo `host.docker.internal:9090` quando configurado:
+
+```bash
+bash scripts/configure_grafana.sh --prometheus-url http://host.docker.internal:9090
+```

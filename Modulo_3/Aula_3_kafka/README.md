@@ -89,6 +89,7 @@ Aula_3_kafka/
     ├── producer.py
     ├── consumer_metrics.py
     ├── configure_prometheus.sh
+    ├── configure_grafana.sh
     └── requirements.txt
 ```
 
@@ -98,6 +99,7 @@ Use estes materiais nesta ordem:
 2. `scripts/README.md`: passo a passo detalhado de execução.
 3. `scripts/producer.py` e `scripts/consumer_metrics.py`: execução da prática.
 4. `scripts/configure_prometheus.sh`: configuração automática do Prometheus.
+5. `scripts/configure_grafana.sh`: configuração automática do Grafana.
 
 ### Roteiro resumido
 
@@ -219,6 +221,30 @@ Para múltiplos consumers:
 bash scripts/configure_prometheus.sh --targets localhost:8001,localhost:8002,localhost:8003
 ```
 
+Para configurar o Grafana já instalado na VM:
+
+```bash
+bash scripts/configure_grafana.sh
+```
+
+Por padrão, o script usa `http://localhost:3000` para o Grafana, `admin/admin` como credencial inicial e `http://localhost:9090` como URL do Prometheus. Se a senha já foi alterada:
+
+```bash
+GRAFANA_USER=admin GRAFANA_PASSWORD='sua-senha' bash scripts/configure_grafana.sh
+```
+
+O script cria ou atualiza:
+
+- data source `Prometheus - Kafka IoT`;
+- pasta `OpAIoT`;
+- dashboard `Kafka IoT - Telemetria Observavel`.
+
+Dashboard:
+
+```text
+http://localhost:3000/d/iot-kafka-telemetry
+```
+
 Consultas PromQL úteis:
 
 ```promql
@@ -231,19 +257,14 @@ iot_events_by_partition_total
 iot_kafka_last_offset
 ```
 
-No Grafana, use o Prometheus como data source:
-
-```text
-http://localhost:9090
-```
-
-Painéis sugeridos:
+Painéis criados no Grafana:
 
 - temperatura por sensor;
 - umidade por sensor;
 - CO2 por sensor;
 - taxa de eventos consumidos;
 - eventos por partition;
-- último offset consumido por partition.
+- último offset consumido por partition;
+- total de eventos consumidos.
 
 Para o passo a passo completo, consulte [scripts/README.md](scripts/README.md).
