@@ -204,7 +204,7 @@ bash scripts/configure_prometheus.sh
 
 Execute esse comando na VM Ubuntu onde o Prometheus está instalado, a partir do diretório `Modulo_3/Aula_3_kafka`.
 
-O script faz backup do `prometheus.yml`, adiciona o job da prática, valida com `promtool check config` e tenta reiniciar o Prometheus. O job configurado é:
+O script faz backup do `prometheus.yml`, adiciona o job da prática, valida com `promtool check config` e reinicia o Prometheus usando `pkill`, como na Aula 1. O job configurado é:
 
 ```yaml
 scrape_configs:
@@ -219,6 +219,12 @@ Para múltiplos consumers:
 
 ```bash
 bash scripts/configure_prometheus.sh --targets localhost:8001,localhost:8002,localhost:8003
+```
+
+Por padrão, o Prometheus fica em primeiro plano. Para iniciar em segundo plano:
+
+```bash
+bash scripts/configure_prometheus.sh --background
 ```
 
 Para configurar o Grafana já instalado na VM:

@@ -6,7 +6,9 @@ JOB_NAME="${PROMETHEUS_JOB_NAME:-iot-kafka-consumers}"
 SCRAPE_INTERVAL="${PROMETHEUS_SCRAPE_INTERVAL:-5s}"
 PROMETHEUS_STORAGE="${PROMETHEUS_STORAGE:-/var/lib/prometheus}"
 PROMETHEUS_LISTEN_ADDRESS="${PROMETHEUS_LISTEN_ADDRESS:-0.0.0.0:9090}"
+PROMETHEUS_LOG="${PROMETHEUS_LOG:-prometheus.log}"
 RESTART_PROMETHEUS=1
+BACKGROUND_PROMETHEUS=0
 
 TARGETS=()
 
@@ -21,12 +23,14 @@ Options:
   --scrape-interval VALUE   Scrape interval. Default: 5s
   --targets LIST            Comma-separated targets, e.g. localhost:8000,localhost:8001
   --no-restart              Update and validate config, but do not restart Prometheus
+  --background              Restart Prometheus with nohup in the background
   -h, --help                Show this help
 
 Examples:
   ./configure_prometheus.sh
   ./configure_prometheus.sh localhost:8000
   ./configure_prometheus.sh --targets localhost:8001,localhost:8002,localhost:8003
+  ./configure_prometheus.sh --background
 
 Environment variables:
   PROMETHEUS_CONFIG
@@ -35,6 +39,7 @@ Environment variables:
   PROMETHEUS_TARGETS
   PROMETHEUS_STORAGE
   PROMETHEUS_LISTEN_ADDRESS
+  PROMETHEUS_LOG
 EOF
 }
 
@@ -72,6 +77,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-restart)
       RESTART_PROMETHEUS=0
+      shift
+      ;;
+    --background)
+      BACKGROUND_PROMETHEUS=1
       shift
       ;;
     -h|--help)
@@ -209,16 +218,45 @@ if [[ "$RESTART_PROMETHEUS" -eq 0 ]]; then
   exit 0
 fi
 
-if command -v systemctl >/dev/null 2>&1 && systemctl list-unit-files prometheus.service --no-legend 2>/dev/null | grep -q '^prometheus.service'; then
-  "${SUDO[@]}" systemctl restart prometheus
-  "${SUDO[@]}" systemctl status prometheus --no-pager || true
-else
-  echo "No prometheus systemd service found."
-  echo "Following the Aula 1 manual procedure, restart Prometheus with:"
+if ! command -v prometheus >/dev/null 2>&1; then
+  echo "prometheus command not found."
+  echo "Restart it manually using the Aula 1 procedure:"
   echo
   echo "pkill -f prometheus"
   echo "prometheus --config.file=${CONFIG_FILE} --storage.tsdb.path=${PROMETHEUS_STORAGE} --web.listen-address=${PROMETHEUS_LISTEN_ADDRESS}"
+  exit 1
 fi
 
+PROMETHEUS_CMD=(
+  prometheus
+  "--config.file=${CONFIG_FILE}"
+  "--storage.tsdb.path=${PROMETHEUS_STORAGE}"
+  "--web.listen-address=${PROMETHEUS_LISTEN_ADDRESS}"
+)
+
 echo
-echo "Check targets at: http://localhost:9090/targets"
+echo "Restarting Prometheus with the Aula 1 procedure."
+echo "Stopping current Prometheus process with pkill..."
+# The safer pattern avoids killing this script, whose filename also contains "prometheus".
+pkill -f '(^|/)prometheus([[:space:]]|$)' || true
+sleep 1
+
+if [[ "$BACKGROUND_PROMETHEUS" -eq 1 ]]; then
+  echo "Starting Prometheus in background:"
+  printf '  %q' "${PROMETHEUS_CMD[@]}"
+  echo
+  nohup "${PROMETHEUS_CMD[@]}" > "$PROMETHEUS_LOG" 2>&1 &
+  echo "Prometheus PID: $!"
+  echo "Log file: $PROMETHEUS_LOG"
+  echo
+  echo "Check targets at: http://localhost:9090/targets"
+else
+  echo "Starting Prometheus in foreground, as in Aula 1."
+  echo "Keep this terminal open while using Prometheus."
+  echo "Targets page: http://localhost:9090/targets"
+  echo
+  printf 'Running:'
+  printf ' %q' "${PROMETHEUS_CMD[@]}"
+  echo
+  "${PROMETHEUS_CMD[@]}"
+fi

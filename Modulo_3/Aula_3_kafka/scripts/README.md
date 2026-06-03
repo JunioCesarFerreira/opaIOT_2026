@@ -326,11 +326,19 @@ Se quiser apenas atualizar e validar a configuração, sem reiniciar o Prometheu
 bash scripts/configure_prometheus.sh --no-restart
 ```
 
-Quando não existir serviço `systemd` para o Prometheus, o script mostra o mesmo procedimento manual usado na Aula 1:
+Por padrão, depois de validar a configuração, o script reinicia o Prometheus com o procedimento usado na Aula 1:
 
 ```bash
 pkill -f prometheus
 prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.listen-address=0.0.0.0:9090
+```
+
+O Prometheus fica rodando em primeiro plano. Deixe esse terminal aberto enquanto usa a interface.
+
+Se quiser iniciar em segundo plano, use:
+
+```bash
+bash scripts/configure_prometheus.sh --background
 ```
 
 Depois confira:
