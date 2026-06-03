@@ -88,6 +88,7 @@ Aula_3_kafka/
     ├── README.md
     ├── producer.py
     ├── consumer_metrics.py
+    ├── configure_prometheus.sh
     └── requirements.txt
 ```
 
@@ -96,6 +97,7 @@ Use estes materiais nesta ordem:
 1. [`instalando_kafka_vm.md`](instalando_kafka_vm.md): instalação do Kafka na VM.
 2. `scripts/README.md`: passo a passo detalhado de execução.
 3. `scripts/producer.py` e `scripts/consumer_metrics.py`: execução da prática.
+4. `scripts/configure_prometheus.sh`: configuração automática do Prometheus.
 
 ### Roteiro resumido
 
@@ -192,14 +194,29 @@ O consumer deve retomar a leitura a partir do offset salvo.
 
 ### Prometheus e Grafana
 
-No `prometheus.yml`, adicione o target do consumer:
+Para configurar o Prometheus seguindo o mesmo procedimento da Aula 1, execute:
+
+```bash
+bash scripts/configure_prometheus.sh
+```
+
+Execute esse comando na VM Ubuntu onde o Prometheus está instalado, a partir do diretório `Modulo_3/Aula_3_kafka`.
+
+O script faz backup do `prometheus.yml`, adiciona o job da prática, valida com `promtool check config` e tenta reiniciar o Prometheus. O job configurado é:
 
 ```yaml
 scrape_configs:
-  - job_name: "iot-kafka-consumer"
+  - job_name: "iot-kafka-consumers"
+    scrape_interval: 5s
     static_configs:
       - targets:
           - "localhost:8000"
+```
+
+Para múltiplos consumers:
+
+```bash
+bash scripts/configure_prometheus.sh --targets localhost:8001,localhost:8002,localhost:8003
 ```
 
 Consultas PromQL úteis:

@@ -10,12 +10,14 @@ O cenário simula sensores ambientais publicando eventos no tópico Kafka `iot.a
 scripts/
 ├── producer.py
 ├── consumer_metrics.py
+├── configure_prometheus.sh
 ├── requirements.txt
 └── README.md
 ```
 
 - `producer.py`: simula sensores IoT e publica eventos no Kafka.
 - `consumer_metrics.py`: consome eventos Kafka e expõe métricas Prometheus.
+- `configure_prometheus.sh`: configura o Prometheus para coletar o endpoint `/metrics` da prática.
 - `requirements.txt`: dependências Python da prática.
 
 ## 1. Pré-requisitos
@@ -262,24 +264,52 @@ LAG
 
 ## 11. Configurar Prometheus
 
-Edite o arquivo `prometheus.yml` e adicione o consumer como target:
+O procedimento segue a lógica usada na Aula 1: configurar o target no `prometheus.yml`, validar com `promtool check config` e reiniciar o Prometheus.
+
+Para configurar automaticamente o target padrão `localhost:8000`, execute:
+
+```bash
+bash scripts/configure_prometheus.sh
+```
+
+Execute esse comando na VM Ubuntu onde o Prometheus está instalado, a partir do diretório `Modulo_3/Aula_3_kafka`.
+
+O script faz backup do arquivo atual antes de alterar:
+
+```text
+/etc/prometheus/prometheus.yml.bak.<timestamp>
+```
+
+Ele adiciona ou atualiza este job:
 
 ```yaml
-global:
-  scrape_interval: 5s
-
 scrape_configs:
-  - job_name: "iot-kafka-consumer"
+  - job_name: "iot-kafka-consumers"
+    scrape_interval: 5s
     static_configs:
       - targets:
           - "localhost:8000"
 ```
 
-Se estiver rodando vários consumers:
+Se estiver rodando vários consumers, informe os targets:
+
+```bash
+bash scripts/configure_prometheus.sh \
+  --targets localhost:8001,localhost:8002,localhost:8003
+```
+
+Ou passe os targets como argumentos:
+
+```bash
+bash scripts/configure_prometheus.sh localhost:8001 localhost:8002 localhost:8003
+```
+
+O resultado esperado no `prometheus.yml` é:
 
 ```yaml
 scrape_configs:
   - job_name: "iot-kafka-consumers"
+    scrape_interval: 5s
     static_configs:
       - targets:
           - "localhost:8001"
@@ -287,13 +317,30 @@ scrape_configs:
           - "localhost:8003"
 ```
 
-Reinicie o Prometheus:
+Se quiser apenas atualizar e validar a configuração, sem reiniciar o Prometheus:
 
 ```bash
-sudo systemctl restart prometheus
+bash scripts/configure_prometheus.sh --no-restart
 ```
 
-Ou pare e inicie novamente, caso esteja executando manualmente.
+Quando não existir serviço `systemd` para o Prometheus, o script mostra o mesmo procedimento manual usado na Aula 1:
+
+```bash
+pkill -f prometheus
+prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus --web.listen-address=0.0.0.0:9090
+```
+
+Depois confira:
+
+```bash
+curl http://localhost:9090/-/healthy
+```
+
+Na interface do Prometheus, abra:
+
+```text
+http://localhost:9090/targets
+```
 
 ## 12. Consultas PromQL úteis
 
