@@ -1,110 +1,80 @@
-# OpAIoT 2026 - Conteúdos de IoT
+# OpAIoT 2026 - Materiais de IoT, Dados e Observabilidade
 
-Este repositório organiza materiais didáticos do curso de OpAIoT, com foco em práticas de Internet das Coisas usando ESP32, sensores, MQTT, pipelines de dados, observabilidade e visualização.
+Este repositório reúne materiais didáticos e práticas do curso OpAIoT 2026, com foco em Internet das Coisas, sensores, ESP32, MQTT, pipelines de dados, séries temporais, Kafka, Prometheus e Grafana.
 
-O `Modulo_2` concentra as práticas com dispositivos, sensores, MQTT e pipeline IoT com Docker. O `Modulo_3` inicia a etapa de integração e observabilidade a partir de datasets, com inspeção em Python e exposição de métricas no Prometheus.
+O material está organizado em módulos. O `Modulo_2` concentra práticas com dispositivos, sensores e pipelines IoT. O `Modulo_3` avança para dados, observabilidade, séries temporais e processamento orientado a eventos.
 
 <img width="1672" height="941" alt="IoT-Mod2" src="https://github.com/user-attachments/assets/5c5769c9-ca2a-4806-bef5-74860d953c09" />
 
-## Como navegar
 
-1. Comece pela prática de blink em [Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino](Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino).
-2. Avance para sensores digitais e analógicos em [Modulo_2/Aula_2_sensores](Modulo_2/Aula_2_sensores).
-3. Aprofunde leitura ADC e conversão de temperatura em [Modulo_2/Aula_4_adc](Modulo_2/Aula_4_adc).
-4. Estude publicação MQTT com DHT22 em [Modulo_2/Aula_7_mqtt/pratica_mqtt.ino](Modulo_2/Aula_7_mqtt/pratica_mqtt.ino).
-5. Execute o pipeline IoT fim a fim em [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot).
-6. No Módulo 3, pratique inspeção de datasets e integração com Prometheus em [Modulo_3/Aula_1_datasets](Modulo_3/Aula_1_datasets).
+## Como Navegar
 
-## Módulos
+1. Comece pelas práticas de ESP32 em [Modulo_2](Modulo_2).
+2. Avance para MQTT e pipeline IoT em [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot).
+3. No Módulo 3, pratique inspeção de datasets e métricas Prometheus em [Modulo_3/Aula_1_datasets](Modulo_3/Aula_1_datasets).
+4. Use [Modulo_3/Aula_2_series_temporais](Modulo_3/Aula_2_series_temporais) como ambiente de apoio com Grafana.
+5. Execute a prática Kafka em [Modulo_3/Aula_3_kafka](Modulo_3/Aula_3_kafka).
+6. Consulte os materiais complementares em [Adicionais](Adicionais).
 
-| Módulo | Tema | Entrada principal |
-| --- | --- | --- |
-| Módulo 2 | Fundamentos práticos de IoT com ESP32, sensores, MQTT e pipeline local | [Modulo_2](Modulo_2) |
-| Módulo 3 | Datasets, inspeção de dados e observabilidade com Prometheus | [Modulo_3/Aula_1_datasets](Modulo_3/Aula_1_datasets) |
+## Folhas-Resumo
 
-## Projetos Wokwi
-
-| Projeto | Link Wokwi | Código interno relacionado |
-| --- | --- | --- |
-| button_toggle_led | [Abrir no Wokwi](https://wokwi.com/projects/463461381500467201) | [pratica_01_esp32_button_toggle_led.ino](Modulo_2/Aula_2_sensores/pratica_01_esp32_button_toggle_led.ino) |
-| rotary_encoder | [Abrir no Wokwi](https://wokwi.com/projects/463512425212322817) | [pratica_02_esp32_rotary_encoder.ino](Modulo_2/Aula_2_sensores/pratica_02_esp32_rotary_encoder.ino) |
-| potentiometer | [Abrir no Wokwi](https://wokwi.com/projects/463513736257544193) | [Aula 2 - pratica_03_esp32_potentiometer.ino](Modulo_2/Aula_2_sensores/pratica_03_esp32_potentiometer.ino) e [Aula 4 - pratica_01_esp32_potentiometer.ino](Modulo_2/Aula_4_adc/pratica_01_esp32_potentiometer.ino) |
-| ntc | [Abrir no Wokwi](https://wokwi.com/projects/463521418790072321) | [pratica_02_esp32_ntc.ino](Modulo_2/Aula_4_adc/pratica_02_esp32_ntc.ino) |
-| dht22-mqtt | [Abrir no Wokwi](https://wokwi.com/projects/463692046389363713) | [esp32_dht22_mqtt.ino](Modulo_2/Aula_8_pipeline_iot/esp32_dht22_mqtt.ino) |
-
-## Códigos internos
-
-### Módulo 2 - IoT
-
-| Aula | Arquivo | Objetivo |
-| --- | --- | --- |
-| Aula 1 - stacks e ferramentas | [pratica_01_ESP32_blink.ino](Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino) | Primeiro contato com ESP32: configurar pino digital, piscar LED e imprimir estado no Monitor Serial. |
-| Aula 2 - sensores | [pratica_01_esp32_button_toggle_led.ino](Modulo_2/Aula_2_sensores/pratica_01_esp32_button_toggle_led.ino) | Ler botão com `INPUT_PULLUP`, aplicar debounce e alternar o estado de um LED. |
-| Aula 2 - sensores | [pratica_02_esp32_rotary_encoder.ino](Modulo_2/Aula_2_sensores/pratica_02_esp32_rotary_encoder.ino) | Ler encoder rotativo, detectar sentido horário/anti-horário e tratar o botão SW. |
-| Aula 2 - sensores | [pratica_03_esp32_potentiometer.ino](Modulo_2/Aula_2_sensores/pratica_03_esp32_potentiometer.ino) | Ler potenciômetro no GPIO34, mostrar valor ADC bruto e converter aproximadamente para tensão. |
-| Aula 4 - ADC | [pratica_01_esp32_potentiometer.ino](Modulo_2/Aula_4_adc/pratica_01_esp32_potentiometer.ino) | Reforçar leitura analógica do potenciômetro usando resolução de 12 bits e atenuação `ADC_11db`. |
-| Aula 4 - ADC | [pratica_02_esp32_ntc.ino](Modulo_2/Aula_4_adc/pratica_02_esp32_ntc.ino) | Calcular temperatura a partir de um NTC em divisor de tensão usando Steinhart-Hart. |
-| Aula 7 - MQTT | [pratica_mqtt.ino](Modulo_2/Aula_7_mqtt/pratica_mqtt.ino) | Conectar ESP32 ao Wi-Fi do Wokwi, ler DHT22 e publicar JSON via MQTT em broker público. |
-| Aula 8 - pipeline IoT | [esp32_dht22_mqtt.ino](Modulo_2/Aula_8_pipeline_iot/esp32_dht22_mqtt.ino) | Publicar temperatura e umidade no tópico `opaiot/temperature` para o pipeline local com Docker. |
-
-### Módulo 3 - Datasets e observabilidade
-
-| Aula | Entrada principal | Objetivo |
-| --- | --- | --- |
-| Aula 1 - datasets | [Modulo_3/Aula_1_datasets/README.md](Modulo_3/Aula_1_datasets/README.md) | Inspecionar um dataset de qualidade do ar, gerar artefatos de análise e expor leituras simuladas como métricas Prometheus. |
-
-Arquivos de apoio da Aula 1:
-
-| Arquivo | Descrição |
+| Tema | Imagem |
 | --- | --- |
-| [data/README.md](Modulo_3/Aula_1_datasets/data/README.md) | Fonte, licença, referências legais e atribuição do dataset Kaggle. |
-| [scripts/README.md](Modulo_3/Aula_1_datasets/scripts/README.md) | Passo a passo para instalar dependências e executar os scripts no Linux. |
-| [scripts/1-inspect.py](Modulo_3/Aula_1_datasets/scripts/1-inspect.py) | Inspeciona o CSV e gera perfis, resumo numérico, schema e eventos normalizados. |
-| [scripts/2-prometheus.py](Modulo_3/Aula_1_datasets/scripts/2-prometheus.py) | Publica leituras do CSV como métricas Prometheus em `localhost:8000/metrics`. |
-| [outputs_example](Modulo_3/Aula_1_datasets/outputs_example) | Exemplo versionado dos arquivos gerados pelo script de inspeção. |
-| [roteiro_pratica_guiada.txt](Modulo_3/Aula_1_datasets/roteiro_pratica_guiada.txt) | Sequência sugerida para gravação da prática guiada. |
+| Docker | [docker.png](Adicionais/folhas%20de%20resumo/docker.png) |
+| Docker Compose | [docker-compose.png](Adicionais/folhas%20de%20resumo/docker-compose.png) |
+| Kafka | [kafka.png](Adicionais/folhas%20de%20resumo/kafka.png) |
 
-## Pipeline IoT - Aula 8
+## Estrutura Principal
 
-A pasta [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot) contém um exemplo fim a fim:
+| Diretório | Conteúdo |
+| --- | --- |
+| [Modulo_2](Modulo_2) | Práticas com ESP32, sensores, ADC, MQTT e pipeline IoT. |
+| [Modulo_3](Modulo_3) | Datasets, observabilidade, séries temporais e Kafka. |
+| [Adicionais](Adicionais) | Notebook complementar e folhas-resumo. |
+
+## Módulo 2 - IoT com ESP32
+
+| Aula | Entrada | Objetivo |
+| --- | --- | --- |
+| Aula 1 - stacks e ferramentas | [pratica_01_ESP32_blink.ino](Modulo_2/Aula_1_stacks_ferramentas/pratica_01_ESP32_blink.ino) | Primeiro contato com ESP32: piscar LED e usar Monitor Serial. |
+| Aula 2 - sensores | [Modulo_2/Aula_2_sensores](Modulo_2/Aula_2_sensores) | Botão, debounce, encoder rotativo e potenciômetro. |
+| Aula 4 - ADC | [Modulo_2/Aula_4_adc](Modulo_2/Aula_4_adc) | Leitura analógica, potenciômetro e sensor NTC. |
+| Aula 7 - MQTT | [pratica_mqtt.ino](Modulo_2/Aula_7_mqtt/pratica_mqtt.ino) | ESP32 com DHT22 publicando JSON via MQTT. |
+| Aula 8 - pipeline IoT | [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot) | Pipeline fim a fim com MQTT, Mosquitto, backend, TimescaleDB e Grafana. |
+
+### Projetos Wokwi
+
+| Projeto | Link Wokwi | Código relacionado |
+| --- | --- | --- |
+| Button toggle LED | [Abrir no Wokwi](https://wokwi.com/projects/463461381500467201) | [pratica_01_esp32_button_toggle_led.ino](Modulo_2/Aula_2_sensores/pratica_01_esp32_button_toggle_led.ino) |
+| Rotary encoder | [Abrir no Wokwi](https://wokwi.com/projects/463512425212322817) | [pratica_02_esp32_rotary_encoder.ino](Modulo_2/Aula_2_sensores/pratica_02_esp32_rotary_encoder.ino) |
+| Potentiometer | [Abrir no Wokwi](https://wokwi.com/projects/463513736257544193) | [Aula 2](Modulo_2/Aula_2_sensores/pratica_03_esp32_potentiometer.ino) e [Aula 4](Modulo_2/Aula_4_adc/pratica_01_esp32_potentiometer.ino) |
+| NTC | [Abrir no Wokwi](https://wokwi.com/projects/463521418790072321) | [pratica_02_esp32_ntc.ino](Modulo_2/Aula_4_adc/pratica_02_esp32_ntc.ino) |
+| DHT22 + MQTT | [Abrir no Wokwi](https://wokwi.com/projects/463692046389363713) | [esp32_dht22_mqtt.ino](Modulo_2/Aula_8_pipeline_iot/esp32_dht22_mqtt.ino) |
+
+### Aula 8 - Pipeline IoT
+
+A pasta [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot) contém um pipeline local completo:
 
 ```text
-ESP32 + DHT22 no Wokwi
+ESP32 + DHT22
   -> MQTT
-  -> Eclipse Mosquitto
+  -> Mosquitto
   -> Backend Node.js
   -> PostgreSQL/TimescaleDB
   -> Grafana
 ```
 
-Arquivos principais:
+Entradas úteis:
 
 | Arquivo | Descrição |
 | --- | --- |
-| [QUICKSTART.md](Modulo_2/Aula_8_pipeline_iot/QUICKSTART.md) | Início rápido para subir o ambiente. |
-| [SETUP.md](Modulo_2/Aula_8_pipeline_iot/SETUP.md) | Passo a passo detalhado de execução e troubleshooting. |
-| [README.md](Modulo_2/Aula_8_pipeline_iot/README.md) | Documentação principal da Aula 8. |
-| [ESTRUTURA.md](Modulo_2/Aula_8_pipeline_iot/ESTRUTURA.md) | Visão técnica dos arquivos, serviços, portas e fluxo de dados. |
-| [INDEX.md](Modulo_2/Aula_8_pipeline_iot/INDEX.md) | Índice dos arquivos da Aula 8. |
-| [docker-compose.yml](Modulo_2/Aula_8_pipeline_iot/docker-compose.yml) | Sobe Mosquitto, TimescaleDB, backend Node.js e Grafana. |
-| [backend/index.js](Modulo_2/Aula_8_pipeline_iot/backend/index.js) | Consome mensagens MQTT, persiste no banco e expõe API HTTP. |
-| [backend/package.json](Modulo_2/Aula_8_pipeline_iot/backend/package.json) | Dependências Node.js: `mqtt`, `pg` e `dotenv`. |
-| [init-db/01-init.sql](Modulo_2/Aula_8_pipeline_iot/init-db/01-init.sql) | Cria hypertable `temperature_metrics`, índices, views e usuário do Grafana. |
-| [QUERIES_UTEIS.sql](Modulo_2/Aula_8_pipeline_iot/QUERIES_UTEIS.sql) | Consultas SQL para inspeção, estatísticas e uso no Grafana. |
-| [grafana/provisioning/datasources/datasources.yml](Modulo_2/Aula_8_pipeline_iot/grafana/provisioning/datasources/datasources.yml) | Datasource TimescaleDB para o Grafana. |
-| [grafana/provisioning/dashboards/dashboards.yml](Modulo_2/Aula_8_pipeline_iot/grafana/provisioning/dashboards/dashboards.yml) | Provisionamento de dashboards. |
-| [grafana/provisioning/dashboards/iot-temperature-dashboard.json](Modulo_2/Aula_8_pipeline_iot/grafana/provisioning/dashboards/iot-temperature-dashboard.json) | Dashboard de temperatura e umidade. |
-| [mosquitto/config/mosquitto.conf](Modulo_2/Aula_8_pipeline_iot/mosquitto/config/mosquitto.conf) | Configuração do broker MQTT Mosquitto. |
-| [dados-teste.json](Modulo_2/Aula_8_pipeline_iot/dados-teste.json) | Payload de exemplo para testes. |
-| [test-mqtt.sh](Modulo_2/Aula_8_pipeline_iot/test-mqtt.sh) | Script Bash para testar publicação MQTT. |
-| [manage.bat](Modulo_2/Aula_8_pipeline_iot/manage.bat) | Script auxiliar para Windows. |
-
-Para subir o pipeline:
-
-```powershell
-cd Modulo_2\Aula_8_pipeline_iot
-docker-compose up -d
-```
+| [QUICKSTART.md](Modulo_2/Aula_8_pipeline_iot/QUICKSTART.md) | Início rápido. |
+| [SETUP.md](Modulo_2/Aula_8_pipeline_iot/SETUP.md) | Passo a passo detalhado. |
+| [README.md](Modulo_2/Aula_8_pipeline_iot/README.md) | Documentação principal da aula. |
+| [ESTRUTURA.md](Modulo_2/Aula_8_pipeline_iot/ESTRUTURA.md) | Descrição técnica dos serviços e arquivos. |
+| [docker-compose.yml](Modulo_2/Aula_8_pipeline_iot/docker-compose.yml) | Sobe Mosquitto, TimescaleDB, backend e Grafana. |
+| [QUERIES_UTEIS.sql](Modulo_2/Aula_8_pipeline_iot/QUERIES_UTEIS.sql) | Consultas SQL para inspeção e dashboards. |
 
 Serviços esperados:
 
@@ -116,31 +86,87 @@ Serviços esperados:
 | Grafana | `http://localhost:3001` |
 | PostgreSQL/TimescaleDB | `localhost:5432` |
 
-Observação: a configuração atual do Docker Compose usa Eclipse Mosquitto como broker MQTT. Alguns textos internos ainda podem mencionar HiveMQ em exemplos antigos, mas os arquivos de execução atuais apontam para o serviço `mosquitto`.
+## Módulo 3 - Dados, Observabilidade e Kafka
 
-## Tópicos MQTT e dados
+| Aula | Entrada | Objetivo |
+| --- | --- | --- |
+| Aula 1 - datasets | [Modulo_3/Aula_1_datasets/README.md](Modulo_3/Aula_1_datasets/README.md) | Inspecionar dataset de qualidade do ar, gerar artefatos e expor métricas Prometheus. |
+| Aula 2 - séries temporais | [Modulo_3/Aula_2_series_temporais](Modulo_3/Aula_2_series_temporais) | Ambiente de apoio com Grafana e provisionamento de datasource Prometheus. |
+| Aula 3 - Kafka | [Modulo_3/Aula_3_kafka/README.md](Modulo_3/Aula_3_kafka/README.md) | Telemetria IoT com Kafka, consumers, partitions, offsets, Prometheus e Grafana. |
 
-O pipeline local da Aula 8 espera mensagens no tópico:
+### Aula 1 - Datasets
+
+Entradas úteis:
+
+| Arquivo | Descrição |
+| --- | --- |
+| [README.md](Modulo_3/Aula_1_datasets/README.md) | Guia principal da prática. |
+| [data/README.md](Modulo_3/Aula_1_datasets/data/README.md) | Fonte, licença e atribuição do dataset. |
+| [scripts/README.md](Modulo_3/Aula_1_datasets/scripts/README.md) | Como executar os scripts. |
+| [scripts/1-inspect.py](Modulo_3/Aula_1_datasets/scripts/1-inspect.py) | Inspeção do CSV e geração de artefatos. |
+| [scripts/2-prometheus.py](Modulo_3/Aula_1_datasets/scripts/2-prometheus.py) | Exportador Prometheus em `localhost:8000/metrics`. |
+| [outputs_example](Modulo_3/Aula_1_datasets/outputs_example) | Exemplo versionado dos arquivos gerados. |
+
+### Aula 2 - Séries Temporais
+
+A pasta [Modulo_3/Aula_2_series_temporais](Modulo_3/Aula_2_series_temporais) contém um `docker-compose.yml` para subir Grafana com provisionamento local.
+
+Entrada principal:
+
+| Arquivo | Descrição |
+| --- | --- |
+| [docker-compose.yml](Modulo_3/Aula_2_series_temporais/docker-compose.yml) | Sobe Grafana em `localhost:3000`. |
+| [grafana/provisioning/datasources/prometheus.yml](Modulo_3/Aula_2_series_temporais/grafana/provisioning/datasources/prometheus.yml) | Datasource Prometheus provisionado. |
+
+### Aula 3 - Kafka
+
+A pasta [Modulo_3/Aula_3_kafka](Modulo_3/Aula_3_kafka) contém a prática de telemetria IoT observável com Kafka.
+
+Entradas úteis:
+
+| Arquivo | Descrição |
+| --- | --- |
+| [README.md](Modulo_3/Aula_3_kafka/README.md) | Visão conceitual e resumo da prática. |
+| [instalando_kafka_vm.md](Modulo_3/Aula_3_kafka/instalando_kafka_vm.md) | Instalação do Kafka na VM. |
+| [scripts/README.md](Modulo_3/Aula_3_kafka/scripts/README.md) | Passo a passo completo de execução. |
+| [scripts/producer.py](Modulo_3/Aula_3_kafka/scripts/producer.py) | Producer Python que simula sensores IoT. |
+| [scripts/consumer_metrics.py](Modulo_3/Aula_3_kafka/scripts/consumer_metrics.py) | Consumer Kafka com endpoint Prometheus. |
+| [scripts/configure_prometheus.sh](Modulo_3/Aula_3_kafka/scripts/configure_prometheus.sh) | Configura Prometheus para coletar os consumers. |
+| [scripts/configure_grafana.sh](Modulo_3/Aula_3_kafka/scripts/configure_grafana.sh) | Configura datasource e dashboard no Grafana. |
+
+Fluxo da prática:
 
 ```text
-opaiot/temperature
+Python Producer
+  -> Kafka topic iot.air_quality
+  -> Python consumers
+  -> /metrics
+  -> Prometheus
+  -> Grafana
 ```
 
-Formato JSON esperado pelo backend:
+## Extras
 
-```json
-{
-  "temperature": 25.5,
-  "humidity": 60.0,
-  "deviceId": "esp32-dht22",
-  "location": "sala"
-}
-```
+| Material | Entrada | Conteúdo |
+| --- | --- | --- |
+| Amostragem e conversão A/D | [Modulo_2/Extras/Aula_sobre_Amostragem](Modulo_2/Extras/Aula_sobre_Amostragem) | ADC, amostragem, FFT, MQTT, InfluxDB e Grafana. |
+| Aplicação de amostragem | [application/README.md](Modulo_2/Extras/Aula_sobre_Amostragem/application/README.md) | Stack executável com ESP32/Wokwi, backend, InfluxDB e Grafana. |
+| Redes mesh | [Modulo_2/Extras/Aula_sobre_Redes_Mesh](Modulo_2/Extras/Aula_sobre_Redes_Mesh) | Materiais sobre Zigbee, RPL, LoRaWAN e classificação de redes IoT. |
+| Materiais adicionais | [Adicionais](Adicionais) | Notebook de regressão linear e folhas-resumo. |
 
-A tabela principal criada no TimescaleDB é:
+## Execução Rápida por Tema
 
-```text
-temperature_metrics
-```
+| Quero... | Comece por |
+| --- | --- |
+| Simular sensores ESP32 no Wokwi | [Projetos Wokwi](#projetos-wokwi) |
+| Rodar pipeline MQTT completo | [Modulo_2/Aula_8_pipeline_iot/QUICKSTART.md](Modulo_2/Aula_8_pipeline_iot/QUICKSTART.md) |
+| Inspecionar dataset IoT | [Modulo_3/Aula_1_datasets](Modulo_3/Aula_1_datasets) |
+| Expor métricas Prometheus | [Modulo_3/Aula_1_datasets/scripts/2-prometheus.py](Modulo_3/Aula_1_datasets/scripts/2-prometheus.py) |
+| Praticar Kafka com telemetria IoT | [Modulo_3/Aula_3_kafka](Modulo_3/Aula_3_kafka) |
+| Configurar Prometheus/Grafana para Kafka | [Modulo_3/Aula_3_kafka/scripts/README.md](Modulo_3/Aula_3_kafka/scripts/README.md) |
 
-Campos principais: `device_id`, `location`, `temperature`, `humidity` e `time`.
+## Observações
+
+- As práticas Arduino foram pensadas para ESP32 e podem ser usadas no Wokwi ou em hardware real, conforme a aula.
+- As práticas com Prometheus e Grafana assumem execução em ambiente Linux/VM, salvo quando houver Docker Compose específico.
+- Alguns diretórios extras têm documentação própria e devem ser lidos a partir de seus READMEs locais.
