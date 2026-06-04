@@ -274,3 +274,8 @@ Painéis criados no Grafana:
 - total de eventos consumidos.
 
 Para o passo a passo completo, consulte [scripts/README.md](scripts/README.md).
+
+> **Caso precise reiniciar o Grafana**
+> ```bash
+> nohup grafana-server --homepath=/usr/share/grafana --config=/etc/grafana/grafana.ini > grafana.log 2>&1 &
+>
