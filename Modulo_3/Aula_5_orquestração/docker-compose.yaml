@@ -6,27 +6,30 @@ services:
     ports:
       - "1883:1883"
     volumes:
+      # Configuração aberta e sem autenticação apenas para laboratório local.
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     restart: unless-stopped
 
   kafka:
-    image: apache/kafka:latest
+    # Versão fixada para evitar que mudanças futuras do "latest" quebrem a prática.
+    image: apache/kafka:4.3.0
     hostname: kafka
     ports:
-      # Porta pedida para o laboratório e listener interno dos containers.
+      # Listener para ferramentas executadas no host: kafka-topics, Kafka UI externo, scripts locais.
       - "9092:9092"
-      # Listener recomendado para clientes executados diretamente no host.
-      - "29092:29092"
     environment:
+      # Broker e controller no mesmo container: configuração KRaft single-node, sem ZooKeeper.
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: CONTROLLER://:9093,PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      # PLAINTEXT é o listener interno da rede Docker; PLAINTEXT_HOST é o acesso pelo host.
+      KAFKA_LISTENERS: CONTROLLER://:29093,PLAINTEXT://:19092,PLAINTEXT_HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://localhost:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
+      # Como há apenas um broker, todos os tópicos internos precisam de fator de replicação 1.
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -35,34 +38,39 @@ services:
       KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Limita o heap para rodar melhor em notebooks e VMs pequenas.
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
     volumes:
+      # Volume persistente para manter offsets e mensagens entre reinícios da stack.
       - kafka-data:/tmp/kraft-combined-logs
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      # Usa o listener interno anunciado aos containers; evita confundir localhost do container com localhost do host.
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --list >/dev/null 2>&1"]
       interval: 10s
       timeout: 10s
-      retries: 12
-      start_period: 30s
+      retries: 18
+      start_period: 45s
     restart: unless-stopped
 
   kafka-init:
-    image: apache/kafka:latest
+    image: apache/kafka:4.3.0
     depends_on:
       kafka:
         condition: service_healthy
+    # Job curto: cria o tópico da prática antes das aplicações Python produzirem/consumirem.
     command:
       - /bin/sh
       - -c
       - |
         /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:9092 \
+          --bootstrap-server kafka:19092 \
           --create \
           --if-not-exists \
           --topic "${KAFKA_TOPIC:-iot.telemetry}" \
           --partitions 3 \
           --replication-factor 1
         /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:9092 \
+          --bootstrap-server kafka:19092 \
           --describe \
           --topic "${KAFKA_TOPIC:-iot.telemetry}"
     restart: "no"
@@ -76,14 +84,15 @@ services:
       - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: opaiot-local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
       DYNAMIC_CONFIG_ENABLED: "false"
     restart: unless-stopped
 
   sensor-simulator:
     build: ./services/sensor-simulator
     depends_on:
-      - mosquitto
+      mosquitto:
+        condition: service_started
     environment:
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
@@ -97,25 +106,25 @@ services:
     depends_on:
       mosquitto:
         condition: service_started
-      kafka:
-        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     environment:
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
       MQTT_TOPIC: ${BRIDGE_MQTT_TOPIC:-iot/+/telemetry}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
       KAFKA_TOPIC: ${KAFKA_TOPIC:-iot.telemetry}
     restart: unless-stopped
 
   iot-processor:
     build: ./services/iot-processor
     depends_on:
-      kafka:
-        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     ports:
       - "8000:8000"
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
       KAFKA_TOPIC: ${KAFKA_TOPIC:-iot.telemetry}
       KAFKA_GROUP_ID: iot-processor
       METRICS_PORT: 8000
@@ -124,10 +133,12 @@ services:
   prometheus:
     image: prom/prometheus:latest
     depends_on:
-      - iot-processor
+      iot-processor:
+        condition: service_started
     ports:
       - "9090:9090"
     volumes:
+      # Prometheus coleta apenas o endpoint /metrics exposto pelo processador Python.
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     restart: unless-stopped
@@ -135,13 +146,15 @@ services:
   grafana:
     image: grafana/grafana:latest
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_started
     ports:
       - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
     volumes:
+      # Provisionamento automático: datasource Prometheus e dashboard da prática.
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro

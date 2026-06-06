@@ -12,7 +12,7 @@ sensor-simulator -> Mosquitto -> mqtt-to-kafka -> Kafka -> iot-processor -> Prom
 cd Modulo_3/Aula_5_orquestração
 ```
 
-Observe que o arquivo principal da prática é `compose.yaml`.
+Observe que o arquivo principal da prática é `docker-compose.yaml`.
 
 ## 2. Conferir estrutura
 
@@ -101,7 +101,7 @@ Entre no cluster `opaiot-local` e veja o tópico `iot.telemetry`.
 
 ```bash
 docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server kafka:9092 \
+  --bootstrap-server kafka:19092 \
   --list
 ```
 
@@ -111,7 +111,7 @@ O tópico esperado é `iot.telemetry`.
 
 ```bash
 docker compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server kafka:9092 \
+  --bootstrap-server kafka:19092 \
   --topic iot.telemetry \
   --from-beginning \
   --max-messages 5

@@ -39,14 +39,13 @@ O Kafka UI também é incluído no Docker Compose para inspecionar tópicos, men
 | Serviço | Porta no host | Uso |
 | --- | --- | --- |
 | Mosquitto | `1883` | MQTT local de laboratório |
-| Kafka | `9092` | listener interno publicado para conferência |
-| Kafka host listener | `29092` | clientes Kafka executados no host |
+| Kafka | `9092` | listener para clientes executados no host |
 | Kafka UI | `8080` | interface web para Kafka |
 | iot-processor | `8000` | endpoint `/metrics` |
 | Prometheus | `9090` | consultas PromQL e targets |
 | Grafana | `3000` | dashboard IoT, `admin/admin` |
 
-Use `kafka:9092` entre containers. Use `localhost:29092` para ferramentas Kafka executadas diretamente no host.
+No Docker Compose, use `kafka:19092` entre containers. Use `localhost:9092` para ferramentas Kafka executadas diretamente no host.
 
 ## Como subir com Docker Compose
 
