@@ -2,6 +2,8 @@
 
 Esta aula prática apresenta o Apache Kafka como infraestrutura para pipelines orientados a eventos em IoT. O cenário simula sensores ambientais enviando medições para um tópico Kafka, consumidores processando esses eventos e métricas sendo expostas para Prometheus e Grafana.
 
+Para execução com Docker veja [Aula_3_kafka](./docker/README.md).
+
 ## 1. Visão conceitual
 
 Kafka não deve ser entendido apenas como uma fila de mensagens. Nesta prática, ele aparece como um **log distribuído de eventos**, em que producers publicam eventos em tópicos, tópicos são divididos em partitions e consumers leem esses eventos mantendo offsets.
@@ -278,4 +280,4 @@ Para o passo a passo completo, consulte [scripts/README.md](scripts/README.md).
 > **Caso precise reiniciar o Grafana**
 > ```bash
 > nohup grafana-server --homepath=/usr/share/grafana --config=/etc/grafana/grafana.ini > grafana.log 2>&1 &
->
+>```
