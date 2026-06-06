@@ -9,7 +9,7 @@ As atividades foram pensadas para execução na VM Linux conteinerizada disponib
 1. Comece pela [Aula 1 - Datasets](Aula_1_datasets/README.md) para inspecionar um CSV de sensores, normalizar eventos IoT e expor métricas Prometheus.
 2. Use a [Aula 2 - Séries Temporais](Aula_2_series_temporais/README.md) como ambiente de apoio para Grafana com datasource Prometheus provisionado.
 3. Avance para a [Aula 3 - Kafka](Aula_3_kafka/README.md) para produzir, consumir e observar eventos IoT em um tópico Kafka.
-4. Consulte a [Aula 5 - Orquestração](Aula_5_orquestração/) quando os materiais forem adicionados.
+4. Feche com a [Aula 5 - Orquestração](Aula_5_orquestração/README.md) para comparar a stack IoT em Docker Compose e Kubernetes.
 
 ## Aulas
 
@@ -18,7 +18,7 @@ As atividades foram pensadas para execução na VM Linux conteinerizada disponib
 | Aula 1 - Datasets | [Aula_1_datasets/README.md](Aula_1_datasets/README.md) | Inspeção de dataset de qualidade do ar, geração de artefatos, exportador Prometheus e dashboard Grafana. |
 | Aula 2 - Séries temporais | [Aula_2_series_temporais/README.md](Aula_2_series_temporais/README.md) | Uso do Grafana com roteiro para VM e alternativa com Docker local. |
 | Aula 3 - Kafka | [Aula_3_kafka/README.md](Aula_3_kafka/README.md) | Producer e consumer Kafka para telemetria IoT, partitions, offsets, lag, Prometheus e Grafana. |
-| Aula 5 - Orquestração | [Aula_5_orquestração](Aula_5_orquestração/) | Diretório reservado para os próximos materiais do módulo. |
+| Aula 5 - Orquestração | [Aula_5_orquestração/README.md](Aula_5_orquestração/README.md) | Stack IoT local com Docker Compose, observabilidade e manifests Kubernetes didáticos. |
 
 ## Estrutura
 
