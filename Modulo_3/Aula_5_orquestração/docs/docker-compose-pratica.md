@@ -101,7 +101,7 @@ Entre no cluster `opaiot-local` e veja o tópico `iot.telemetry`.
 
 ```bash
 docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server kafka:19092 \
+  --bootstrap-server kafka:9092 \
   --list
 ```
 
@@ -111,7 +111,7 @@ O tópico esperado é `iot.telemetry`.
 
 ```bash
 docker compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server kafka:19092 \
+  --bootstrap-server kafka:9092 \
   --topic iot.telemetry \
   --from-beginning \
   --max-messages 5

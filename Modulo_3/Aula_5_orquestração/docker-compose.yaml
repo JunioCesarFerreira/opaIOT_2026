@@ -9,39 +9,51 @@ services:
       # Configuração aberta e sem autenticação apenas para laboratório local.
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   kafka:
-    # Versão fixada para evitar que mudanças futuras do "latest" quebrem a prática.
-    image: apache/kafka:4.3.0
+    # Mesma base da Aula 3: Kafka em KRaft, sem ZooKeeper, com um broker local.
+    image: apache/kafka:4.0.0
     hostname: kafka
     ports:
-      # Listener para ferramentas executadas no host: kafka-topics, Kafka UI externo, scripts locais.
-      - "9092:9092"
+      # Listener externo para ferramentas executadas no host.
+      # Dentro da rede Docker os containers usam kafka:9092.
+      - "29092:29092"
     environment:
+      # Broker e controller no mesmo container: configuração KRaft single-node, sem ZooKeeper.
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # PLAINTEXT atende os containers; EXTERNAL atende clientes no host.
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Como há apenas um broker, todos os tópicos internos precisam de fator de replicação 1.
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
       TZ: America/Sao_Paulo
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      # Caminho de dados usado pela imagem apache/kafka:4.0.0, como na Aula 3.
+      - kafka-data:/var/lib/kafka/data
     healthcheck:
+      # Checa a API do broker diretamente, antes de liberar os serviços dependentes.
       test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
       interval: 10s
       timeout: 10s
       retries: 10
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   kafka-init:
-    image: apache/kafka:4.3.0
+    image: apache/kafka:4.0.0
     depends_on:
       kafka:
         condition: service_healthy
@@ -51,17 +63,20 @@ services:
       - -c
       - |
         /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:19092 \
+          --bootstrap-server kafka:9092 \
           --create \
           --if-not-exists \
           --topic "${KAFKA_TOPIC:-iot.telemetry}" \
           --partitions 3 \
           --replication-factor 1
+        echo "Tópico ${KAFKA_TOPIC:-iot.telemetry} pronto:"
         /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:19092 \
+          --bootstrap-server kafka:9092 \
           --describe \
           --topic "${KAFKA_TOPIC:-iot.telemetry}"
     restart: "no"
+    networks:
+      - opaiot-iot
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -72,9 +87,11 @@ services:
       - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: opaiot-local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       DYNAMIC_CONFIG_ENABLED: "false"
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   sensor-simulator:
     build: ./services/sensor-simulator
@@ -88,6 +105,8 @@ services:
       DEVICE_ID: ${DEVICE_ID:-device-001}
       PUBLISH_INTERVAL: ${PUBLISH_INTERVAL:-2}
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   mqtt-to-kafka:
     build: ./services/mqtt-to-kafka
@@ -100,9 +119,11 @@ services:
       MQTT_HOST: mosquitto
       MQTT_PORT: 1883
       MQTT_TOPIC: ${BRIDGE_MQTT_TOPIC:-iot/+/telemetry}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC: ${KAFKA_TOPIC:-iot.telemetry}
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   iot-processor:
     build: ./services/iot-processor
@@ -112,14 +133,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC: ${KAFKA_TOPIC:-iot.telemetry}
       KAFKA_GROUP_ID: iot-processor
       METRICS_PORT: 8000
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.0
     depends_on:
       iot-processor:
         condition: service_started
@@ -130,9 +153,11 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.4.0
     depends_on:
       prometheus:
         condition: service_started
@@ -141,14 +166,22 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      TZ: America/Sao_Paulo
     volumes:
       # Provisionamento automático: datasource Prometheus e dashboard da prática.
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     restart: unless-stopped
+    networks:
+      - opaiot-iot
 
 volumes:
   kafka-data:
   prometheus-data:
   grafana-data:
+
+networks:
+  opaiot-iot:
+    driver: bridge
