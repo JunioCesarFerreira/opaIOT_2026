@@ -56,6 +56,7 @@ Se o playground já compartilha o Docker local com o cluster, o carregamento ext
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Active namespace/opaiot-p5 --timeout=60s
 ```
 
 Verifique:
@@ -67,10 +68,19 @@ kubectl get ns opaiot-p5
 ## 5. Aplicar manifests
 
 ```bash
-kubectl apply -f k8s/
+kubectl apply -f k8s/mosquitto.yaml
+kubectl apply -f k8s/kafka.yaml
+kubectl apply -f k8s/kafka-ui.yaml
+kubectl apply -f k8s/sensor-simulator.yaml
+kubectl apply -f k8s/mqtt-to-kafka.yaml
+kubectl apply -f k8s/iot-processor.yaml
+kubectl apply -f k8s/prometheus.yaml
+kubectl apply -f k8s/grafana.yaml
 ```
 
-O arquivo `redpanda.yaml` é uma alternativa didática. Por padrão, use `kafka.yaml`; aplique Redpanda separadamente apenas se quiser trocar o broker.
+O arquivo `k8s/alternativas/redpanda.yaml` é uma alternativa didática. Por padrão, use `kafka.yaml`; aplique Redpanda separadamente apenas se quiser trocar o broker.
+
+Evite `kubectl apply -f k8s/` nesta prática. O diretório contém arquivos com funções diferentes e a aplicação em lote pode tentar criar recursos antes de o namespace estar pronto.
 
 ## 6. Listar Pods, Deployments e Services
 
@@ -282,4 +292,4 @@ kubectl get ns opaiot-p5
 
 - Esta versão usa Kafka single-node em KRaft. É boa para aula, não para produção.
 - Os apps Python precisam de imagens locais ou de um registry acessível pelo cluster.
-- Se Kafka ficar pesado no playground, use `k8s/redpanda.yaml` como alternativa e ajuste `KAFKA_BOOTSTRAP_SERVERS` para `redpanda:9092`.
+- Se Kafka ficar pesado no playground, use `k8s/alternativas/redpanda.yaml` como alternativa e ajuste `KAFKA_BOOTSTRAP_SERVERS` para `redpanda:9092`.
