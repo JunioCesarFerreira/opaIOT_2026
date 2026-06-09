@@ -54,6 +54,41 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Pré-requisitos
+
+- Python 3.10+ e `pip`
+- Docker (se for usar a stack em `docker compose`)
+
+## Executar localmente (exemplo rápido)
+
+Linux/macOS:
+
+```bash
+cd Modulo_3/Aula_4_esp32_mqtt_kafka
+cp .env.example .env
+cd scripts
+source .venv/bin/activate
+set -o allexport; source ../.env; set +o allexport
+python mqtt_kafka_producer.py
+```
+
+Windows PowerShell:
+
+```powershell
+cd Modulo_3\Aula_4_esp32_mqtt_kafka
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+cd scripts
+.venv\Scripts\Activate.ps1
+# Carrega variáveis do .env para o processo (simples)
+Get-Content ..\.env | ForEach-Object {
+  if ($_ -match '^[^#=]+=(.*)$') {
+    $parts = $_ -split '='; [System.Environment]::SetEnvironmentVariable($parts[0].Trim(), $parts[1].Trim(), 'Process')
+  }
+}
+$env:KAFKA_BOOTSTRAP_SERVERS = $env:KAFKA_EXTERNAL_BOOTSTRAP
+python mqtt_kafka_producer.py
+```
+
 ## Execução
 
 Com a stack da aula (`docker compose up --build -d` na raiz de `Aula_4_esp32_mqtt_kafka`), o serviço `mqtt-kafka-producer` já executa este script.

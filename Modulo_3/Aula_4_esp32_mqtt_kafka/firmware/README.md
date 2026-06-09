@@ -2,6 +2,19 @@
 
 Publica telemetria no broker MQTT no formato da Aula 3, pronta para o bridge `scripts/mqtt_kafka_producer.py`.
 
+## Pré-requisitos
+
+- Arduino IDE ou PlatformIO (para compilar/gravar)
+- Wokwi (opcional, para simulação)
+- Cabo USB para gravação em placa física
+
+## Rápido (gravando e testando)
+
+1. Abra `esp32_mq7_mqtt.ino` na Arduino IDE ou no PlatformIO.
+2. Ajuste `MQTT_SERVER` com o IP do host (use `ipconfig` no Windows ou `ifconfig`/`ip a` no Linux).
+3. Compile e grave na placa ESP32.
+4. Para simular, crie um projeto no Wokwi e cole o código; ajuste `MQTT_SERVER` conforme o endpoint acessível.
+
 ## Componentes
 
 | Item | Valor |

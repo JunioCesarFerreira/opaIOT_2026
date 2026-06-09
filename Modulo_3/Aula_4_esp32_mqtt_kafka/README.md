@@ -2,6 +2,35 @@
 
 Esta aula conecta telemetria MQTT ao tópico Kafka `iot.air_quality` da [Aula 3](../Aula_3_kafka/README.md), mantendo o mesmo formato de evento usado pelo `producer.py` da prática anterior.
 
+## Pré-requisitos
+
+- Docker & Docker Compose instalados e funcionais
+- Kafka da [Aula 3](../Aula_3_kafka/README.md) em execução (veja instruções na Aula 3)
+- Python 3.10+ (para executar os scripts localmente, opcional se usar Docker)
+
+## Rápido (quick start)
+
+1. Suba o Kafka da Aula 3:
+
+```bash
+cd Modulo_3/Aula_3_kafka/docker
+docker compose up -d
+```
+
+2. Na pasta desta aula copie o exemplo de variáveis e suba a stack:
+
+```bash
+cd Modulo_3/Aula_4_esp32_mqtt_kafka
+cp .env.example .env
+docker compose up --build -d
+```
+
+3. Logs:
+
+```bash
+docker compose logs -f --tail=50 mosquitto mqtt-kafka-producer
+```
+
 ## Objetivo
 
 - ler mensagens JSON de um broker MQTT;
