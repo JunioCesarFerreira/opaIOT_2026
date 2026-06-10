@@ -1,11 +1,8 @@
-# Exemplo de ACL para aula de segurança e governança
-
-user esp32_pub
-topic write opaiot/+/+/telemetry/#
-topic read opaiot/+/+/config/#
-
-user grafana_reader
-topic read opaiot/#
-
-user admin
-topic readwrite #
+user sensor01
+topic write opaiot/sensors/sensor01/telemetry
+user monitor01
+topic read opaiot/sensors/+/telemetry
+topic read opaiot/devices/+/status
+user operador01
+topic read opaiot/sensors/+/telemetry
+topic write opaiot/devices/+/cmd
