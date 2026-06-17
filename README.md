@@ -7,15 +7,6 @@ O material está organizado em módulos. O `Modulo_2` concentra práticas com di
 <img width="1672" height="941" alt="IoT-Mod2" src="https://github.com/user-attachments/assets/5c5769c9-ca2a-4806-bef5-74860d953c09" />
 
 
-## Como Navegar
-
-1. Comece pelas práticas de ESP32 em [Modulo_2](Modulo_2).
-2. Avance para MQTT e pipeline IoT em [Modulo_2/Aula_8_pipeline_iot](Modulo_2/Aula_8_pipeline_iot).
-3. No Módulo 3, pratique inspeção de datasets e métricas Prometheus em [Modulo_3/Aula_1_datasets](Modulo_3/Aula_1_datasets).
-4. Use [Modulo_3/Aula_2_series_temporais](Modulo_3/Aula_2_series_temporais) como ambiente de apoio com Grafana.
-5. Execute a prática Kafka em [Modulo_3/Aula_3_kafka](Modulo_3/Aula_3_kafka).
-6. Consulte os materiais complementares em [Adicionais](Adicionais).
-
 ## Folhas-Resumo
 
 | Tema | Imagem |
@@ -93,6 +84,9 @@ Serviços esperados:
 | Aula 1 - datasets | [Modulo_3/Aula_1_datasets/README.md](Modulo_3/Aula_1_datasets/README.md) | Inspecionar dataset de qualidade do ar, gerar artefatos e expor métricas Prometheus. |
 | Aula 2 - séries temporais | [Modulo_3/Aula_2_series_temporais](Modulo_3/Aula_2_series_temporais) | Ambiente de apoio com Grafana e provisionamento de datasource Prometheus. |
 | Aula 3 - Kafka | [Modulo_3/Aula_3_kafka/README.md](Modulo_3/Aula_3_kafka/README.md) | Telemetria IoT com Kafka, consumers, partitions, offsets, Prometheus e Grafana. |
+| Aula 4 - MQTT para Kafka | [Modulo_3/Aula_4_esp32_mqtt_kafka/README.md](Modulo_3/Aula_4_esp32_mqtt_kafka/README.md) | Ponte MQTT -> Kafka com Mosquitto e firmware ESP32 (DHT22 + MQ-7). |
+| Aula 5 - orquestração | [Modulo_3/Aula_5_orquestração/README.md](Modulo_3/Aula_5_orquestração/README.md) | Stack IoT completa em Docker Compose e manifests Kubernetes didáticos. |
+| Aula 6 - segurança e governança | [Modulo_3/Aula_6_seguranca_governanca/README.md](Modulo_3/Aula_6_seguranca_governanca/README.md) | Autenticação MQTT, ACL por tópico e Grafana como camada de governança. |
 
 ### Aula 1 - Datasets
 
@@ -145,6 +139,57 @@ Python Producer
   -> Grafana
 ```
 
+### Aula 4 - MQTT para Kafka
+
+A pasta [Modulo_3/Aula_4_esp32_mqtt_kafka](Modulo_3/Aula_4_esp32_mqtt_kafka) conecta telemetria MQTT ao tópico `iot.air_quality` da Aula 3, reaproveitando o mesmo formato de evento.
+
+```text
+ESP32 + DHT22 + MQ-7
+  -> Mosquitto MQTT
+  -> mqtt_kafka_producer.py
+  -> Kafka topic iot.air_quality (Aula 3)
+  -> consumers da Aula 3
+```
+
+| Arquivo | Descrição |
+| --- | --- |
+| [README.md](Modulo_3/Aula_4_esp32_mqtt_kafka/README.md) | Guia da ponte MQTT -> Kafka. |
+| [docker-compose.yml](Modulo_3/Aula_4_esp32_mqtt_kafka/docker-compose.yml) | Sobe Mosquitto e o bridge `mqtt-kafka-producer`. |
+| [firmware/esp32_mq7_mqtt.ino](Modulo_3/Aula_4_esp32_mqtt_kafka/firmware/esp32_mq7_mqtt.ino) | Firmware ESP32 + DHT22 + MQ-7 publicando via MQTT. |
+| [scripts/mqtt_kafka_producer.py](Modulo_3/Aula_4_esp32_mqtt_kafka/scripts/mqtt_kafka_producer.py) | Ponte MQTT -> Kafka em Python. |
+
+### Aula 5 - Orquestração
+
+A pasta [Modulo_3/Aula_5_orquestração](Modulo_3/Aula_5_orquestração) sobe uma stack IoT completa em Docker Compose e oferece a leitura equivalente em Kubernetes.
+
+```text
+sensor-simulator
+  -> Mosquitto MQTT
+  -> mqtt-to-kafka
+  -> Kafka (+ Kafka UI)
+  -> iot-processor
+  -> Prometheus
+  -> Grafana
+```
+
+| Arquivo | Descrição |
+| --- | --- |
+| [README.md](Modulo_3/Aula_5_orquestração/README.md) | Guia da prática Compose + Kubernetes. |
+| [docker-compose.yaml](Modulo_3/Aula_5_orquestração/docker-compose.yaml) | Stack IoT local completa. |
+| [docs/docker-compose-pratica.md](Modulo_3/Aula_5_orquestração/docs/docker-compose-pratica.md) | Roteiro da prática com Docker Compose. |
+| [docs/kubernetes-pratica.md](Modulo_3/Aula_5_orquestração/docs/kubernetes-pratica.md) | Roteiro da prática com Kubernetes. |
+| [k8s/README.md](Modulo_3/Aula_5_orquestração/k8s/README.md) | Manifests Kubernetes comentados. |
+
+### Aula 6 - Segurança e Governança
+
+A pasta [Modulo_3/Aula_6_seguranca_governanca](Modulo_3/Aula_6_seguranca_governanca) traz um ambiente Mosquitto com autenticação e ACL por tópico, além do Grafana como camada de governança.
+
+| Arquivo | Descrição |
+| --- | --- |
+| [README.md](Modulo_3/Aula_6_seguranca_governanca/README.md) | Guia de autenticação, ACL e testes. |
+| [docker-compose.yml](Modulo_3/Aula_6_seguranca_governanca/docker-compose.yml) | Sobe Mosquitto e Grafana. |
+| [mosquitto/config/acl](Modulo_3/Aula_6_seguranca_governanca/mosquitto/config/acl) | Perfis de acesso por tópico (`sensor01`, `monitor01`, `operador01`). |
+
 ## Extras
 
 | Material | Entrada | Conteúdo |
@@ -164,6 +209,9 @@ Python Producer
 | Expor métricas Prometheus | [Modulo_3/Aula_1_datasets/scripts/2-prometheus.py](Modulo_3/Aula_1_datasets/scripts/2-prometheus.py) |
 | Praticar Kafka com telemetria IoT | [Modulo_3/Aula_3_kafka](Modulo_3/Aula_3_kafka) |
 | Configurar Prometheus/Grafana para Kafka | [Modulo_3/Aula_3_kafka/scripts/README.md](Modulo_3/Aula_3_kafka/scripts/README.md) |
+| Conectar telemetria MQTT ao Kafka | [Modulo_3/Aula_4_esp32_mqtt_kafka](Modulo_3/Aula_4_esp32_mqtt_kafka) |
+| Orquestrar a stack IoT (Compose e Kubernetes) | [Modulo_3/Aula_5_orquestração](Modulo_3/Aula_5_orquestração) |
+| Aplicar autenticação e ACL no MQTT | [Modulo_3/Aula_6_seguranca_governanca](Modulo_3/Aula_6_seguranca_governanca) |
 
 ## Observações
 
