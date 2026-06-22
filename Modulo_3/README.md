@@ -9,7 +9,9 @@ As atividades foram pensadas para execução na VM Linux conteinerizada disponib
 1. Comece pela [Aula 1 - Datasets](Aula_1_datasets/README.md) para inspecionar um CSV de sensores, normalizar eventos IoT e expor métricas Prometheus.
 2. Use a [Aula 2 - Séries Temporais](Aula_2_series_temporais/README.md) como ambiente de apoio para Grafana com datasource Prometheus provisionado.
 3. Avance para a [Aula 3 - Kafka](Aula_3_kafka/README.md) para produzir, consumir e observar eventos IoT em um tópico Kafka.
-4. Feche com a [Aula 5 - Orquestração](Aula_5_orquestração/README.md) para comparar a stack IoT em Docker Compose e Kubernetes.
+4. Conecte telemetria MQTT ao Kafka na [Aula 4 - MQTT para Kafka](Aula_4_esp32_mqtt_kafka/README.md), reaproveitando o tópico da Aula 3.
+5. Compare a stack IoT em Docker Compose e Kubernetes na [Aula 5 - Orquestração](Aula_5_orquestração/README.md).
+6. Feche com a [Aula 6 - Segurança e Governança](Aula_6_seguranca_governanca/README.md) para aplicar autenticação e ACL no MQTT.
 
 ## Aulas
 
@@ -18,7 +20,9 @@ As atividades foram pensadas para execução na VM Linux conteinerizada disponib
 | Aula 1 - Datasets | [Aula_1_datasets/README.md](Aula_1_datasets/README.md) | Inspeção de dataset de qualidade do ar, geração de artefatos, exportador Prometheus e dashboard Grafana. |
 | Aula 2 - Séries temporais | [Aula_2_series_temporais/README.md](Aula_2_series_temporais/README.md) | Uso do Grafana com roteiro para VM e alternativa com Docker local. |
 | Aula 3 - Kafka | [Aula_3_kafka/README.md](Aula_3_kafka/README.md) | Producer e consumer Kafka para telemetria IoT, partitions, offsets, lag, Prometheus e Grafana. |
+| Aula 4 - MQTT para Kafka | [Aula_4_esp32_mqtt_kafka/README.md](Aula_4_esp32_mqtt_kafka/README.md) | Ponte MQTT -> Kafka com Mosquitto, firmware ESP32 (DHT22 + MQ-7) e reaproveitamento do tópico da Aula 3. |
 | Aula 5 - Orquestração | [Aula_5_orquestração/README.md](Aula_5_orquestração/README.md) | Stack IoT local com Docker Compose, observabilidade e manifests Kubernetes didáticos. |
+| Aula 6 - Segurança e Governança | [Aula_6_seguranca_governanca/README.md](Aula_6_seguranca_governanca/README.md) | Autenticação MQTT, ACL por tópico e Grafana como camada de governança. |
 
 ## Estrutura
 
@@ -37,7 +41,21 @@ Modulo_3/
 │   ├── scripts/
 │   ├── README.md
 │   └── instalando_kafka_vm.md
-└── Aula_5_orquestração/
+├── Aula_4_esp32_mqtt_kafka/
+│   ├── docker/
+│   ├── firmware/
+│   ├── mosquitto/
+│   ├── scripts/
+│   └── docker-compose.yml
+├── Aula_5_orquestração/
+│   ├── k8s/
+│   ├── services/
+│   ├── docs/
+│   └── docker-compose.yaml
+└── Aula_6_seguranca_governanca/
+    ├── mosquitto/
+    ├── grafana/
+    └── docker-compose.yml
 ```
 
 ## Ambientes de execução
@@ -65,28 +83,39 @@ Entradas úteis:
 | Aula 1 com Docker | [Aula_1_datasets/docker/README.md](Aula_1_datasets/docker/README.md) |
 | Aula 2 com Docker local | [Aula_2_series_temporais/README.md](Aula_2_series_temporais/README.md) |
 | Aula 3 com Docker | [Aula_3_kafka/docker/README.md](Aula_3_kafka/docker/README.md) |
+| Aula 4 ponte MQTT -> Kafka | [Aula_4_esp32_mqtt_kafka/README.md](Aula_4_esp32_mqtt_kafka/README.md) |
+| Aula 5 stack completa (Compose + Kubernetes) | [Aula_5_orquestração/README.md](Aula_5_orquestração/README.md) |
+| Aula 6 segurança MQTT | [Aula_6_seguranca_governanca/README.md](Aula_6_seguranca_governanca/README.md) |
 
 ## Serviços e portas comuns
 
 | Serviço | Porta padrão | Onde aparece |
 | --- | --- | --- |
 | Exportador Prometheus da Aula 1 | `8000` | `Aula_1_datasets/scripts/2-prometheus.py` |
-| Prometheus | `9090` | Aulas 1 e 3 |
-| Grafana | `3000` | Aulas 1, 2 e 3 |
-| Kafka | `9092` | Aula 3 |
+| Prometheus | `9090` | Aulas 1, 3 e 5 |
+| Grafana | `3000` | Aulas 1, 2, 3 e 5 |
+| Kafka | `9092` / `29092` | Aulas 3, 4 e 5 |
+| Kafka UI | `8080` | Aula 5 |
+| Mosquitto (MQTT) | `1883` | Aulas 4 e 6 |
 | Métricas dos consumers Kafka | `8000`, `8001`, `8002`, `8003` | Aula 3 |
+
+> A [Aula 6](Aula_6_seguranca_governanca/README.md) desloca as portas no host
+> (`20202`/`20203` para MQTT e `9001` para o Grafana) para evitar conflito com
+> outras práticas. Consulte sempre o README da aula antes de subir os serviços.
 
 Se duas práticas forem executadas ao mesmo tempo, verifique conflitos de portas antes de subir os serviços.
 
 ## Fluxo geral do módulo
 
 ```text
-Dataset IoT
-  -> inspeção e normalização
-  -> métricas Prometheus
-  -> visualização Grafana
-  -> eventos Kafka
-  -> consumers observáveis
+Dataset IoT / sensores
+  -> inspeção e normalização        (Aula 1)
+  -> métricas Prometheus            (Aula 1)
+  -> visualização Grafana           (Aula 2)
+  -> eventos Kafka                  (Aula 3)
+  -> ponte MQTT -> Kafka            (Aula 4)
+  -> orquestração Compose/K8s       (Aula 5)
+  -> segurança e governança MQTT    (Aula 6)
 ```
 
 ## Requisitos gerais
